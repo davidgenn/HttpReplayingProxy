@@ -26,14 +26,13 @@ public class ReplayingProxyHandler  extends AbstractHandler {
 	private static final Logger LOG = LoggerFactory.getLogger(ReplayingProxyHandler.class);
 
 	private final HttpReplayingProxyConfiguration configuration;
-	//private final Jedis jedis;
 	private final ConcurrentHashMap<String, CachedResponse> cache = new ConcurrentHashMap<String, CachedResponse>();
+    private final FileBasedCache fileBasedCache;
 
-	public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) {
+	public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) throws IOException {
 		this.configuration = configuration;
-		//		jedis = new Jedis("pub-redis-19186.us-east-1-3.4.ec2.garantiadata.com", 19186);
-		//		jedis.auth("proxycache");
-	}
+        fileBasedCache = new FileBasedCache("C:/Users/David/HttpReplayingProxy/src/test/java/davidgenn/httpreplayingproxy/");
+    }
 
 	@Override
 	public void handle(String target, Request baseRequest,
@@ -42,7 +41,7 @@ public class ReplayingProxyHandler  extends AbstractHandler {
 
 		RequestToProxy requestToProxy = RequestToProxy.from(baseRequest);
 		LOG.info("Proxying="+requestToProxy.toString());
-		CachedResponse cachedContent = cache.get(requestToProxy.toString());
+		CachedResponse cachedContent = fileBasedCache.get(requestToProxy);
 		if (cachedContent == null) {
 			LOG.info("Cache-MISS="+requestToProxy.toString());
 			CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -67,12 +66,12 @@ public class ReplayingProxyHandler  extends AbstractHandler {
 			response.setStatus(proxiedResponse.getStatusLine().getStatusCode());
 			baseRequest.setHandled(true);
 			response.getWriter().write(content);
-			cache.put(requestToProxy.toString(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), content));
-			//			jedis.expire(requestToProxy.toString(), 5);
+			cache.put(requestToProxy.toString(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy));
+            fileBasedCache.put(requestToProxy.getRequestPath(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy));
 		} else {
 			LOG.info("Cache-HIT="+requestToProxy.toString());
 			response.addHeader("x-http-replaying-proxy-cached", "true");
-			response.getWriter().write(cachedContent.getResponse());
+			response.getWriter().write(cachedContent.getResponse().getBodyAsString());
 			response.setStatus(cachedContent.getStatusCode());
 			baseRequest.setHandled(true);
 		}

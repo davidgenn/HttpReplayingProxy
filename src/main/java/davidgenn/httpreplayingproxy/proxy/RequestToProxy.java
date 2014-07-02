@@ -2,13 +2,7 @@ package davidgenn.httpreplayingproxy.proxy;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CloseShieldInputStream;
@@ -23,10 +17,12 @@ import com.google.common.collect.Lists;
 
 public class RequestToProxy {
 
-	private final Header[] headers;
-	private final String requestPath;
-	private final HttpMethod method;
-	private final HttpEntity body;
+	private Header[] headers;
+	private String requestPath;
+	private HttpMethod method;
+	private HttpEntity body;
+
+    public RequestToProxy() {}
 
 	public RequestToProxy(Header[] headers, String requestPath, HttpMethod httpMethod, HttpEntity body) {
 		this.headers = headers;
@@ -112,4 +108,48 @@ public class RequestToProxy {
 		}
 		return sb.toString();
 	}
+
+    public void setHeaders(Header[] headers) {
+        this.headers = headers;
+    }
+
+    public void setRequestPath(String requestPath) {
+        this.requestPath = requestPath;
+    }
+
+    public void setMethod(HttpMethod method) {
+        this.method = method;
+    }
+
+    public void setBody(HttpEntity body) {
+        this.body = body;
+    }
+
+    public String getBodyAsString() throws IOException {
+        return new String(IOUtils.toByteArray(body.getContent()));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        RequestToProxy that = (RequestToProxy) o;
+
+        if (body != null ? !body.equals(that.body) : that.body != null) return false;
+        if (!Arrays.equals(headers, that.headers)) return false;
+        if (method != that.method) return false;
+        if (requestPath != null ? !requestPath.equals(that.requestPath) : that.requestPath != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = headers != null ? Arrays.hashCode(headers) : 0;
+        result = 31 * result + (requestPath != null ? requestPath.hashCode() : 0);
+        result = 31 * result + (method != null ? method.hashCode() : 0);
+        result = 31 * result + (body != null ? body.hashCode() : 0);
+        return result;
+    }
 }
