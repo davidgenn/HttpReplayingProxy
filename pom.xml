@@ -5,7 +5,49 @@
 	<artifactId>http-replaying-proxy</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>HTTP Replaying Proxy</name>
-	<description>HTTP Replaying Proxy</description>
+	<description>The HTTP Replaying Proxy is a library that allows you to mock HTTP requests with realistic responses. </description>
+    <url>https://github.com/davidgenn/HttpReplayingProxy</url>
+    <packaging>jar</packaging>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://www.opensource.org/licenses/mit-license.php</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>David Genn</name>
+            <email>davidgenn@gmail.com</email>
+            <organizationUrl>https://github.com/davidgenn</organizationUrl>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:git@github.com:davidgenn/HttpReplayingProxy.git</connection>
+        <developerConnection>scm:git:git@github.com:davidgenn/HttpReplayingProxy.git</developerConnection>
+        <url>git@github.com:davidgenn/HttpReplayingProxy.git</url>
+    </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.2.1</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 	<dependencies>
 		<dependency>
@@ -49,9 +91,6 @@
             <version>17.0</version>
         </dependency>
 
-
-
-
         <!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -71,7 +110,5 @@
 			<version>1.4</version>
 			<scope>test</scope>
 		</dependency>
-
-
 	</dependencies>
 </project>
