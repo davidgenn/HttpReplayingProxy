@@ -7,7 +7,6 @@ import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
-import sun.misc.Cache;
 
 import java.io.*;
 import java.lang.reflect.Type;
@@ -83,7 +82,7 @@ public class FileBasedCache {
             @Override
             public JsonElement serialize(HttpEntity src, Type typeOfSrc, JsonSerializationContext context) {
                 try {
-                    return new JsonPrimitive(new String(IOUtils.toByteArray(content.getResponse().getBody().getContent())));
+                    return new JsonPrimitive(new String(IOUtils.toByteArray(content.getRequestToProxy().getBody().getContent())));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -94,7 +93,7 @@ public class FileBasedCache {
         fileWriter.flush();
         fileWriter.close();
 
-        cache.put(filename, content);
+        cache.put(file.getName(), content);
 
     }
 
@@ -105,10 +104,21 @@ public class FileBasedCache {
 
     public CachedResponse get(RequestToProxy requestToProxy) {
         for (CachedResponse response : cache.values()) {
-            if (response.getResponse().toString().equals(requestToProxy.toString())) {
+            if (response.getRequestToProxy().toString().equals(requestToProxy.toString())) {
                 return response;
             }
         }
         return null;
+    }
+
+    public void reset() {
+        cache.clear();
+        File directory = new File(rootDirectory);
+        for (File file : directory.listFiles()) {
+            if (file.isDirectory()) {
+               continue;
+            }
+            file.delete();
+        }
     }
 }

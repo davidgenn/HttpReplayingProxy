@@ -31,7 +31,7 @@ public class ReplayingProxyHandler  extends AbstractHandler {
 
 	public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) throws IOException {
 		this.configuration = configuration;
-        fileBasedCache = new FileBasedCache("C:/Users/David/HttpReplayingProxy/src/test/java/davidgenn/httpreplayingproxy/");
+        fileBasedCache = new FileBasedCache("C:/Users/David/HttpReplayingProxy/src/test/java/davidgenn/httpreplayingproxy/cache/");
     }
 
 	@Override
@@ -66,12 +66,11 @@ public class ReplayingProxyHandler  extends AbstractHandler {
 			response.setStatus(proxiedResponse.getStatusLine().getStatusCode());
 			baseRequest.setHandled(true);
 			response.getWriter().write(content);
-			cache.put(requestToProxy.toString(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy));
-            fileBasedCache.put(requestToProxy.getRequestPath(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy));
+            fileBasedCache.put(requestToProxy.getRequestPath(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy, content));
 		} else {
 			LOG.info("Cache-HIT="+requestToProxy.toString());
 			response.addHeader("x-http-replaying-proxy-cached", "true");
-			response.getWriter().write(cachedContent.getResponse().getBodyAsString());
+			response.getWriter().write(cachedContent.getContent());
 			response.setStatus(cachedContent.getStatusCode());
 			baseRequest.setHandled(true);
 		}
