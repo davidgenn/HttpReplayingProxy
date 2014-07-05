@@ -22,8 +22,6 @@ public class RequestToProxy {
 	private HttpMethod method;
 	private HttpEntity body;
 
-    public RequestToProxy() {}
-
 	public RequestToProxy(Header[] headers, String requestPath, HttpMethod httpMethod, HttpEntity body) {
 		this.headers = headers;
 		this.body = body;
@@ -39,12 +37,7 @@ public class RequestToProxy {
 			if ("Content-Length".equals(headerName)) {
 				continue;
 			}
-            if ("Content".equals(headerName)) {
-                continue;
-            }
-            if ("Host".equals(headerName)) {
-                continue;
-            }
+
 			BasicHeader header = new BasicHeader(headerName, baseRequest.getHeader(headerName));
 			headers.add(header);
 		}

@@ -7,6 +7,7 @@ public class HttpReplayingProxyConfiguration {
 	
 	private String proxyUrl;
 	private int port = 8080;
+    private String cacheRootDirectory;
 	
 	public HttpReplayingProxyConfiguration urlToProxyTo(String urlToProxyTo) {
 		this.proxyUrl = urlToProxyTo;
@@ -18,6 +19,11 @@ public class HttpReplayingProxyConfiguration {
 		return this;
 	}
 
+    public HttpReplayingProxyConfiguration withRootDirectoryForCache(String cacheRootDirectory) {
+        this.cacheRootDirectory = cacheRootDirectory;
+        return this;
+    }
+
 	public String getUrlToProxyTo() {
 		return proxyUrl;
 	}
@@ -26,4 +32,7 @@ public class HttpReplayingProxyConfiguration {
 		return port;
 	}
 
+    public String getCacheRootDirectory() {
+        return cacheRootDirectory;
+    }
 }

@@ -19,60 +19,64 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-
 public class ReplayingProxyHandler  extends AbstractHandler {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ReplayingProxyHandler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReplayingProxyHandler.class);
 
-	private final HttpReplayingProxyConfiguration configuration;
-	private final ConcurrentHashMap<String, CachedResponse> cache = new ConcurrentHashMap<String, CachedResponse>();
+    private final HttpReplayingProxyConfiguration configuration;
+    private final ConcurrentHashMap<String, CachedResponse> cache = new ConcurrentHashMap<String, CachedResponse>();
     private final FileBasedCache fileBasedCache;
 
-	public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) throws IOException {
-		this.configuration = configuration;
-        fileBasedCache = new FileBasedCache("C:/Users/David/HttpReplayingProxy/src/test/java/davidgenn/httpreplayingproxy/cache/");
+    public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) throws IOException {
+        this.configuration = configuration;
+        fileBasedCache = new FileBasedCache(configuration.getCacheRootDirectory());
     }
 
-	@Override
-	public void handle(String target, Request baseRequest,
-			HttpServletRequest request, HttpServletResponse response)
-	throws IOException, ServletException {
+    @Override
+    public void handle(String target, Request baseRequest,
+                       HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
 
-		RequestToProxy requestToProxy = RequestToProxy.from(baseRequest);
-		LOG.info("Proxying="+requestToProxy.toString());
-		CachedResponse cachedContent = fileBasedCache.get(requestToProxy);
-		if (cachedContent == null) {
-			LOG.info("Cache-MISS="+requestToProxy.toString());
-			CloseableHttpClient httpclient = HttpClients.createDefault();
+        RequestToProxy requestToProxy = RequestToProxy.from(baseRequest);
+        LOG.info("Proxying="+requestToProxy.toString());
+        CachedResponse cachedContent = fileBasedCache.get(requestToProxy);
+        if (cachedContent == null) {
+            LOG.info("Cache-MISS="+requestToProxy.toString());
 
-			HttpRequestBase httpRequest = null;
+            CloseableHttpResponse proxiedResponse = callRealService(requestToProxy);
 
-			switch (requestToProxy.getHttpMethod()) {
-			case GET:
-				httpRequest = new HttpGet(configuration.getUrlToProxyTo() + requestToProxy.getRequestPath());
-				break;
-			case POST:
-				httpRequest = new HttpPost(configuration.getUrlToProxyTo() + requestToProxy.getRequestPath());
-				((HttpPost)httpRequest).setEntity(requestToProxy.getBody());
-			default:
-				break;
-			}
-
-			httpRequest.setHeaders(requestToProxy.getHeaders());
-
-			CloseableHttpResponse proxiedResponse = httpclient.execute(httpRequest);
-			String content = IOUtils.toString(proxiedResponse.getEntity().getContent());
-			response.setStatus(proxiedResponse.getStatusLine().getStatusCode());
-			baseRequest.setHandled(true);
-			response.getWriter().write(content);
+            String content = IOUtils.toString(proxiedResponse.getEntity().getContent());
+            response.setStatus(proxiedResponse.getStatusLine().getStatusCode());
+            baseRequest.setHandled(true);
+            response.getWriter().write(content);
             fileBasedCache.put(requestToProxy.getRequestPath(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy, content));
-		} else {
-			LOG.info("Cache-HIT="+requestToProxy.toString());
-			response.addHeader("x-http-replaying-proxy-cached", "true");
-			response.getWriter().write(cachedContent.getContent());
-			response.setStatus(cachedContent.getStatusCode());
-			baseRequest.setHandled(true);
-		}
-	}
+        } else {
+            LOG.info("Cache-HIT="+requestToProxy.toString());
+            response.addHeader("x-http-replaying-proxy-cached", "true");
+            response.getWriter().write(cachedContent.getContent());
+            response.setStatus(cachedContent.getStatusCode());
+            baseRequest.setHandled(true);
+        }
+    }
+
+    private CloseableHttpResponse callRealService(RequestToProxy requestToProxy) throws IOException {
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+
+        HttpRequestBase httpRequest = null;
+
+        switch (requestToProxy.getHttpMethod()) {
+            case GET:
+                httpRequest = new HttpGet(configuration.getUrlToProxyTo() + requestToProxy.getRequestPath());
+                break;
+            case POST:
+                httpRequest = new HttpPost(configuration.getUrlToProxyTo() + requestToProxy.getRequestPath());
+                ((HttpPost)httpRequest).setEntity(requestToProxy.getBody());
+            default:
+                throw new RuntimeException("Http Method="+ requestToProxy.getHttpMethod() + " is currently unsupported. Please raise a ticket.");
+        }
+
+        httpRequest.setHeaders(requestToProxy.getHeaders());
+
+        return httpclient.execute(httpRequest);
+    }
 }

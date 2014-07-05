@@ -111,9 +111,9 @@ public class FileBasedCache {
         return null;
     }
 
-    public void reset() {
-        cache.clear();
+    public static void reset(String rootDirectory) {
         File directory = new File(rootDirectory);
+        directory.mkdir();
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
                continue;

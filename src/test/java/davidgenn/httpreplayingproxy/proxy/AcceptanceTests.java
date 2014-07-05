@@ -19,13 +19,23 @@ import static org.fest.assertions.Assertions.*;
 
 public class AcceptanceTests {
 
+    public static final String ROOT_DIRECTORY = "cache/";
     @Rule
     public WireMockRule wireMockRule = new WireMockRule(8080);
     private Server server;
 
     @Before
     public void reset() throws IOException {
-        new FileBasedCache("C:/Users/David/HttpReplayingProxy/src/test/java/davidgenn/httpreplayingproxy/cache/").reset();
+        String directory = rootDirectory();
+        FileBasedCache.reset(directory);
+    }
+
+    private String rootDirectory() {
+        if (System.getProperty("cache.root.directory") == null) {
+            throw new RuntimeException("cache.root.directory System Property not set. Please set it and try again!");
+        }
+        System.out.println("Cache root directory: " + System.getProperty("cache.root.directory"));
+        return System.getProperty("cache.root.directory");
     }
 
     @Test
@@ -37,12 +47,7 @@ public class AcceptanceTests {
                         .withStatus(200)
                         .withBody("<response>Some content</response>")));
 
-        HttpReplayingProxyConfiguration configuration =
-                new HttpReplayingProxyConfiguration()
-                        .urlToProxyTo("http://localhost:8080")
-                        .portToHostOn(8585);
-
-        server = new HttpReplayingProxy(configuration).start();
+        startHttpReplayingProxyServer();
 
         // When
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -70,12 +75,7 @@ public class AcceptanceTests {
                         .withStatus(200)
                         .withBody("<response>Some content</response>")));
 
-        HttpReplayingProxyConfiguration configuration =
-                new HttpReplayingProxyConfiguration()
-                        .urlToProxyTo("http://localhost:8080")
-                        .portToHostOn(8585);
-
-        server = new HttpReplayingProxy(configuration).start();
+        startHttpReplayingProxyServer();
 
         // When
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -111,12 +111,7 @@ public class AcceptanceTests {
                         .withStatus(200)
                         .withBody("<response>Some content TWO</response>")));
 
-        HttpReplayingProxyConfiguration configuration =
-                new HttpReplayingProxyConfiguration()
-                        .urlToProxyTo("http://localhost:8080")
-                        .portToHostOn(8585);
-
-        server = new HttpReplayingProxy(configuration).start();
+        startHttpReplayingProxyServer();
 
         // When
         CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -150,6 +145,16 @@ public class AcceptanceTests {
         assertThat(proxiedResponse2.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
     }
 
+    private void startHttpReplayingProxyServer() throws Exception {
+        HttpReplayingProxyConfiguration configuration =
+                new HttpReplayingProxyConfiguration()
+                        .urlToProxyTo("http://localhost:8080")
+                        .portToHostOn(8585)
+                        .withRootDirectoryForCache(rootDirectory());
+
+        server = new HttpReplayingProxy(configuration).start();
+    }
+
     @Test
     public void test_get_404_is_proxied_and_cached() throws Exception {
         // Given
@@ -159,12 +164,7 @@ public class AcceptanceTests {
                                 .withStatus(404)
                 ));
 
-        HttpReplayingProxyConfiguration configuration =
-                new HttpReplayingProxyConfiguration()
-                        .urlToProxyTo("http://localhost:8080")
-                        .portToHostOn(8585);
-
-        server = new HttpReplayingProxy(configuration).start();
+        startHttpReplayingProxyServer();
 
         // When
         CloseableHttpClient httpclient = HttpClients.createDefault();
