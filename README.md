@@ -8,8 +8,22 @@ The cached result can be included in your project's test tree as test artifacts.
 
 This means your component/integration tests can test against realistic data but do not require the downstream applications to be available.
 
-The cache can be rest at any time.
+The cache can be reset at any time, allowing the fixtures to be refreshed and therefore kept current.
 ## Getting started
+Checkout the source and install it:
+
+     mvn clean install
+     
+Add the dependency to your project:
+
+    <dependency>
+        <groupId>davidgenn</groupId>
+    	<artifactId>http-replaying-proxy</artifactId>
+    	<version>0.1.0-SNAPSHOT</version>
+    </dependency>
+    
+Use the following in your test:
+
     HttpReplayingProxyConfiguration configuration =
                 new HttpReplayingProxyConfiguration()
                         .urlToProxyTo("https://service-I-call.com")
