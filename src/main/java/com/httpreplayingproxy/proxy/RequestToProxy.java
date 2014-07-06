@@ -12,13 +12,23 @@ import org.eclipse.jetty.server.Request;
 
 import com.google.common.collect.Lists;
 
-public class RequestToProxy {
+/**
+ * The request being proxied.
+ */
+class RequestToProxy {
 
 	private Header[] headers;
 	private String requestPath;
 	private HttpMethod method;
 	private HttpEntity body;
 
+    /**
+     * Create a new RequestToProxy.
+     * @param headers The headers on the request.
+     * @param requestPath The request path.
+     * @param httpMethod The HTTP method.
+     * @param body The request body - for POSTs and PUTs.
+     */
 	public RequestToProxy(Header[] headers, String requestPath, HttpMethod httpMethod, HttpEntity body) {
 		this.headers = headers;
 		this.body = body;
@@ -26,6 +36,12 @@ public class RequestToProxy {
 		this.requestPath = requestPath;
 	}
 
+    /**
+     * Builds a RequestToProxy from an HTTP request.
+     * @param baseRequest The request.
+     * @return The built RequestToProxy.
+     * @throws IOException
+     */
 	public static RequestToProxy from(Request baseRequest) throws IOException {
 		Set<Header> headers = new HashSet<Header>();
 		Enumeration<String> headerNames = baseRequest.getHeaderNames();
@@ -55,20 +71,30 @@ public class RequestToProxy {
 				body);
 	}
 
-
+    /**
+     * @return The headers.
+     */
 	public Header[] getHeaders() {
 		return headers;
 	}
 
-
+    /**
+     * @return The request path.
+     */
 	public String getRequestPath() {
 		return requestPath;
 	}
 
+    /**
+     * @return The HTTP method.
+     */
 	public HttpMethod getHttpMethod() {
 		return method;
 	}
 
+    /**
+     * @return The body of the request.
+     */
 	public HttpEntity getBody() {
 		return body;
 	}
@@ -104,26 +130,6 @@ public class RequestToProxy {
 		}
 		return sb.toString();
 	}
-
-    public void setHeaders(Header[] headers) {
-        this.headers = headers;
-    }
-
-    public void setRequestPath(String requestPath) {
-        this.requestPath = requestPath;
-    }
-
-    public void setMethod(HttpMethod method) {
-        this.method = method;
-    }
-
-    public void setBody(HttpEntity body) {
-        this.body = body;
-    }
-
-    public String getBodyAsString() throws IOException {
-        return new String(IOUtils.toByteArray(body.getContent()));
-    }
 
     @Override
     public boolean equals(Object o) {

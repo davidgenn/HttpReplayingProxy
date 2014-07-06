@@ -1,6 +1,9 @@
 package com.httpreplayingproxy.proxy;
 
-public enum HttpMethod {
+/**
+ * The HTTP Method.
+ */
+enum HttpMethod {
 	
 	GET, POST, PUT, DELETE, OPTIONS;
 

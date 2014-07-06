@@ -20,6 +20,9 @@ import java.io.IOException;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.fest.assertions.Assertions.*;
 
+/**
+ * The acceptance tests for the HttpReplayingProxy.
+ */
 public class AcceptanceTest {
 
     public static final String ROOT_DIRECTORY = "cache/";

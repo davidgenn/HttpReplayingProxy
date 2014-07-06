@@ -38,7 +38,7 @@ The responses will be cached in `/some/directory/to/cache/in`. This could be the
 
 To reset the cache:
 
-    HttpReplayingProxy.reset("/some/directory/to/cache/in");
+    FileBasedCache.reset("/some/directory/to/cache/in");
      
 ## How does it work?
 HttpReplayingProxy creates a Jetty server at `localhost` on whatever port you specify.

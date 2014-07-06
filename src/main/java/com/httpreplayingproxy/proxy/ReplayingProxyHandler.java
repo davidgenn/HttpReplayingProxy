@@ -19,7 +19,11 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReplayingProxyHandler  extends AbstractHandler {
+/**
+ * The core Jetty handler that receives the requests that are to be proxied.
+ * <p>Firstly it determines if the request is already present in the cache. If not, it calls the 'real' service.</p>
+ */
+class ReplayingProxyHandler  extends AbstractHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(ReplayingProxyHandler.class);
 
@@ -27,6 +31,11 @@ public class ReplayingProxyHandler  extends AbstractHandler {
     private final ConcurrentHashMap<String, CachedResponse> cache = new ConcurrentHashMap<String, CachedResponse>();
     private final FileBasedCache fileBasedCache;
 
+    /**
+     * Returns a ReplayingProxyHandler.
+     * @param configuration The configuration.
+     * @throws IOException
+     */
     public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) throws IOException {
         this.configuration = configuration;
         fileBasedCache = new FileBasedCache(configuration.getCacheRootDirectory());

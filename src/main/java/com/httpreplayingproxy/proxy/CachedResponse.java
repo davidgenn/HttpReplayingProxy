@@ -1,25 +1,43 @@
 package com.httpreplayingproxy.proxy;
 
-public class CachedResponse {
+/**
+ * An element in the FileBasedCache.
+ */
+class CachedResponse {
 
     private final String content;
     private final int statusCode;
 	private final RequestToProxy requestToProxy;
 
+    /**
+     * Creates a CachedResponse.
+     * @param statusCode The status code.
+     * @param requestToProxy The request to proxy.
+     * @param content The content of the response.
+     */
     public CachedResponse(int statusCode, RequestToProxy requestToProxy, String content) {
 		this.requestToProxy = requestToProxy;
 		this.statusCode = statusCode;
         this.content = content;
 	}
 
+    /**
+     * @return The status code.
+     */
 	public int getStatusCode() {
 		return statusCode;
 	}
 
+    /**
+     * @return The request to proxy.
+     */
 	public RequestToProxy getRequestToProxy() {
 		return requestToProxy;
 	}
 
+    /**
+     * @return The cached content of the response.
+     */
     public String getContent() {
         return content;
     }

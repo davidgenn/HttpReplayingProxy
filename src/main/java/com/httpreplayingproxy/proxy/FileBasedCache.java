@@ -14,11 +14,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FileBasedCache {
+/**
+ * The cache used to store the responses.
+ */
+class FileBasedCache {
 
     private final String rootDirectory;
     private final Map<String, CachedResponse> cache = new HashMap<String, CachedResponse>();
 
+    /**
+     * Creates a FileBasedCache.
+     * @param rootDirectory The directory to cache the responses in.
+     * @throws IOException
+     */
     public FileBasedCache(String rootDirectory) throws IOException {
         this.rootDirectory = rootDirectory;
         File directory = new File(rootDirectory);
@@ -68,6 +76,12 @@ public class FileBasedCache {
 
     }
 
+    /**
+     * Adds an entry to the cache.
+     * @param filename The file name.
+     * @param content The content to cache.
+     * @throws IOException
+     */
     public void put(String filename, final CachedResponse content) throws IOException {
 
         String safeFileName = escapeFileName(filename);
@@ -102,6 +116,11 @@ public class FileBasedCache {
         return filename.replace("/", "-").replace("?", "+").replace("&", "+");
     }
 
+    /**
+     * Returns the cached entry. Returns null for a cache miss.
+     * @param requestToProxy The request being proxied.
+     * @return The cached response. Null if not present.
+     */
     public CachedResponse get(RequestToProxy requestToProxy) {
         for (CachedResponse response : cache.values()) {
             if (response.getRequestToProxy().toString().equals(requestToProxy.toString())) {
@@ -111,6 +130,10 @@ public class FileBasedCache {
         return null;
     }
 
+    /**
+     * Empties the cache.
+     * @param rootDirectory The directory storing the cached responses.
+     */
     public static void reset(String rootDirectory) {
         File directory = new File(rootDirectory);
         directory.mkdir();
