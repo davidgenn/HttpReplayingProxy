@@ -1,4 +1,4 @@
-package davidgenn.httpreplayingproxy.proxy;
+package com.httpreplayingproxy.proxy;
 
 public class CachedResponse {
 

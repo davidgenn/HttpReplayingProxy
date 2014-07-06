@@ -1,4 +1,4 @@
-package davidgenn.httpreplayingproxy.proxy;
+package com.httpreplayingproxy.proxy;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,6 +71,7 @@ public class ReplayingProxyHandler  extends AbstractHandler {
             case POST:
                 httpRequest = new HttpPost(configuration.getUrlToProxyTo() + requestToProxy.getRequestPath());
                 ((HttpPost)httpRequest).setEntity(requestToProxy.getBody());
+                break;
             default:
                 throw new RuntimeException("Http Method="+ requestToProxy.getHttpMethod() + " is currently unsupported. Please raise a ticket.");
         }

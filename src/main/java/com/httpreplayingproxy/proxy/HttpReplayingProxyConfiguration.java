@@ -1,7 +1,4 @@
-package davidgenn.httpreplayingproxy.proxy;
-
-import java.net.InetSocketAddress;
-import java.net.URI;
+package com.httpreplayingproxy.proxy;
 
 public class HttpReplayingProxyConfiguration {
 	

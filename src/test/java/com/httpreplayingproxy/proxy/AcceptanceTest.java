@@ -1,5 +1,8 @@
-package davidgenn.httpreplayingproxy.proxy;
+package com.httpreplayingproxy.proxy;
 
+import com.httpreplayingproxy.proxy.FileBasedCache;
+import com.httpreplayingproxy.proxy.HttpReplayingProxy;
+import com.httpreplayingproxy.proxy.HttpReplayingProxyConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -17,7 +20,7 @@ import java.io.IOException;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.fest.assertions.Assertions.*;
 
-public class AcceptanceTests {
+public class AcceptanceTest {
 
     public static final String ROOT_DIRECTORY = "cache/";
     @Rule

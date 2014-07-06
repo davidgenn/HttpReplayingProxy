@@ -17,7 +17,7 @@ Checkout the source and install it:
 Add the dependency to your project:
 
     <dependency>
-        <groupId>davidgenn</groupId>
+        <groupId>com.httpreplayingproxy</groupId>
     	<artifactId>http-replaying-proxy</artifactId>
     	<version>0.1.0-SNAPSHOT</version>
     </dependency>
@@ -35,6 +35,11 @@ Use the following in your test:
 Your application should be configured to call `http://localhost:8585` instead of `https://service-I-call.com`.
 
 The responses will be cached in `/some/directory/to/cache/in`. This could be the test directory of your project and then the fixtures can be committed alongside your tests.
+
+To reset the cache:
+
+    HttpReplayingProxy.reset("/some/directory/to/cache/in");
+     
 ## How does it work?
 HttpReplayingProxy creates a Jetty server at `localhost` on whatever port you specify.
 ## How mature is this library?

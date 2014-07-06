@@ -1,15 +1,12 @@
-package davidgenn.httpreplayingproxy.proxy;
+package com.httpreplayingproxy.proxy;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.input.CloseShieldInputStream;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.ByteArrayEntity;
-import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.message.BasicHeader;
 import org.eclipse.jetty.server.Request;
 
