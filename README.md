@@ -17,7 +17,7 @@ Checkout the source and install it:
 Add the dependency to your project:
 
     <dependency>
-        <groupId>com.httpreplayingproxy</groupId>
+        <groupId>com.github.davidgenn</groupId>
     	<artifactId>http-replaying-proxy</artifactId>
     	<version>0.1.0-SNAPSHOT</version>
     </dependency>

@@ -1,4 +1,4 @@
-package com.httpreplayingproxy.proxy;
+package com.github.davidgenn.httpreplayingproxy.proxy;
 
 /**
  * An element in the FileBasedCache.

@@ -1,4 +1,4 @@
-package com.httpreplayingproxy.proxy;
+package com.github.davidgenn.httpreplayingproxy.proxy;
 
 /**
  * Configures the behaviour of a HttpReplayingProxy.

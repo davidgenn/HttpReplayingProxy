@@ -1,4 +1,4 @@
-package com.httpreplayingproxy.proxy;
+package com.github.davidgenn.httpreplayingproxy.proxy;
 
 import java.io.IOException;
 import java.util.concurrent.ConcurrentHashMap;

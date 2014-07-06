@@ -1,4 +1,4 @@
-package com.httpreplayingproxy.proxy;
+package com.github.davidgenn.httpreplayingproxy.proxy;
 
 import org.eclipse.jetty.server.Server;
 

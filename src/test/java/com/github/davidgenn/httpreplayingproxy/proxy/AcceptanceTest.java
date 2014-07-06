@@ -1,8 +1,5 @@
-package com.httpreplayingproxy.proxy;
+package com.github.davidgenn.httpreplayingproxy.proxy;
 
-import com.httpreplayingproxy.proxy.FileBasedCache;
-import com.httpreplayingproxy.proxy.HttpReplayingProxy;
-import com.httpreplayingproxy.proxy.HttpReplayingProxyConfiguration;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
