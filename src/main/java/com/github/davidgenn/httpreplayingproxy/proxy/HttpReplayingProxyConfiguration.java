@@ -8,6 +8,7 @@ public class HttpReplayingProxyConfiguration {
 	private String proxyUrl;
 	private int port = 8080;
     private String cacheRootDirectory;
+    private long timeToLiveSeconds = Long.MAX_VALUE / 2000;
 
     /**
      * @param urlToProxyTo The 'real' url to proxy calls to.
@@ -37,6 +38,15 @@ public class HttpReplayingProxyConfiguration {
     }
 
     /**
+     * @param timeToLiveSeconds The time to live for the cache in seconds.
+     * @return The HttpReplayingProxyConfiguration.
+     */
+    public HttpReplayingProxyConfiguration timeToLiveForCacheInSeconds(long timeToLiveSeconds) {
+        this.timeToLiveSeconds = timeToLiveSeconds;
+        return this;
+    }
+
+    /**
      * @return The url being proxied.
      */
 	public String getUrlToProxyTo() {
@@ -55,5 +65,12 @@ public class HttpReplayingProxyConfiguration {
      */
     public String getCacheRootDirectory() {
         return cacheRootDirectory;
+    }
+
+    /**
+     * @return The time to live for the cache in seconds.
+     */
+    public long getTimeToLiveSeconds() {
+        return timeToLiveSeconds;
     }
 }

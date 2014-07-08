@@ -36,6 +36,11 @@ Your application should be configured to call `http://localhost:8585` instead of
 The responses will be cached in `/some/directory/to/cache/in`. This could be the test directory of your project and then the fixtures can be committed alongside your tests.
 
 ## How do you keep the cached responses up to date?
+You can either:
+
+* Set a Time To Live on the cache configuration `new HttpReplayingProxyConfiguration().timeToLiveForCacheInSeconds(86400) // One day `
+* Or you can rest the cache manually
+
 You can reset the cache in two ways:
 
     FileBasedCache.reset("/some/directory/to/cache/in");

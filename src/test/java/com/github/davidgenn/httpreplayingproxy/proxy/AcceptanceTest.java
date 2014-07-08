@@ -158,6 +158,17 @@ public class AcceptanceTest {
         server = new HttpReplayingProxy(configuration).start();
     }
 
+    private void startHttpReplayingProxyServer(long ttl) throws Exception {
+        HttpReplayingProxyConfiguration configuration =
+                new HttpReplayingProxyConfiguration()
+                        .urlToProxyTo("http://localhost:8080")
+                        .portToHostOn(8585)
+                        .withRootDirectoryForCache(rootDirectory())
+                        .timeToLiveForCacheInSeconds(ttl);
+
+        server = new HttpReplayingProxy(configuration).start();
+    }
+
     @Test
     public void test_get_404_is_proxied_and_cached() throws Exception {
         // Given
@@ -216,9 +227,44 @@ public class AcceptanceTest {
         assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
         assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
         assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull(); // Still an uncached response
+    }
 
+    @Test
+    public void test_cache_expiry() throws Exception {
+        // Given
+        stubFor(get(urlEqualTo("/verify/this?query=value"))
+                .withHeader("My-Header", equalTo("header-value"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("<response>Some content</response>")));
 
+        startHttpReplayingProxyServer(1);
 
+        // When
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Header", "header-value");
+        CloseableHttpResponse proxiedResponse = httpclient.execute(httpGet);
+
+        // Then
+
+        // First call
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
+
+        // Second call - should be cached
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
+
+        // Third call - should be refreshed
+        Thread.sleep(1010); // Slightly more than a second
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
     }
 
     @After

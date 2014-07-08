@@ -38,7 +38,7 @@ class ReplayingProxyHandler  extends AbstractHandler {
      */
     public ReplayingProxyHandler(HttpReplayingProxyConfiguration configuration) throws IOException {
         this.configuration = configuration;
-        fileBasedCache = new FileBasedCache(configuration.getCacheRootDirectory());
+        fileBasedCache = new FileBasedCache(configuration.getCacheRootDirectory(), configuration.getTimeToLiveSeconds());
     }
 
     @Override

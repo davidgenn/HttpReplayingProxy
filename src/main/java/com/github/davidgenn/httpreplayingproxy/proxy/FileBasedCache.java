@@ -23,14 +23,16 @@ class FileBasedCache {
 
     private final String rootDirectory;
     private final Map<String, CachedResponse> cache = new HashMap<String, CachedResponse>();
+    private final long timeToLiveInSeconds;
 
     /**
      * Creates a FileBasedCache.
      * @param rootDirectory The directory to cache the responses in.
      * @throws IOException
      */
-    public FileBasedCache(String rootDirectory) throws IOException {
+    public FileBasedCache(String rootDirectory, long timeToLiveInSeconds) throws IOException {
         this.rootDirectory = rootDirectory;
+        this.timeToLiveInSeconds = timeToLiveInSeconds;
         resetCacheAtStartup(rootDirectory);
         prePopulateCache();
     }
@@ -146,12 +148,21 @@ class FileBasedCache {
      * @return The cached response. Null if not present.
      */
     public CachedResponse get(RequestToProxy requestToProxy) {
+        CachedResponse responseToReturn = null;
         for (CachedResponse response : cache.values()) {
             if (response.getRequestToProxy().toString().equals(requestToProxy.toString())) {
-                return response;
+                responseToReturn = response;
+                break;
             }
         }
+        if (responseToReturn != null && hasNotExpired(responseToReturn)) {
+            return responseToReturn;
+        }
         return null;
+    }
+
+    private boolean hasNotExpired(CachedResponse responseToReturn) {
+        return (responseToReturn.getTimeCreatedUtcMillis() + (timeToLiveInSeconds * 1000)) > new Date().getTime();
     }
 
     /**
