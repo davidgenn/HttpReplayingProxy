@@ -19,6 +19,8 @@ import java.util.Map;
  */
 class FileBasedCache {
 
+    public static final String RESET_CACHE_AT_STARTUP = "reset.httpreplayingproxy.cache";
+
     private final String rootDirectory;
     private final Map<String, CachedResponse> cache = new HashMap<String, CachedResponse>();
 
@@ -29,8 +31,32 @@ class FileBasedCache {
      */
     public FileBasedCache(String rootDirectory) throws IOException {
         this.rootDirectory = rootDirectory;
+        resetCacheAtStartup(rootDirectory);
+        prePopulateCache();
+    }
+
+    private void prePopulateCache() throws IOException {
+        File directory = resolveCacheDirectory(rootDirectory);
+        Gson gson = getGson();
+        if (directory.listFiles() == null) {
+            return;
+        }
+        for (File file : directory.listFiles()) {
+            if (file.isDirectory()) {
+                continue;
+            }
+            CachedResponse requestToProxy = gson.fromJson(IOUtils.toString(new FileReader(file)), CachedResponse.class);
+            cache.put(file.getAbsolutePath(), requestToProxy);
+        }
+    }
+
+    private static File resolveCacheDirectory(String rootDirectory) {
         File directory = new File(rootDirectory);
-        directory.mkdir();
+        directory.mkdirs();
+        return directory;
+    }
+
+    private Gson getGson() {
         GsonBuilder builder = new GsonBuilder();
         builder.registerTypeAdapter(Header.class, new InstanceCreator<Header>() {
             @Override
@@ -65,15 +91,13 @@ class FileBasedCache {
                 }
             }
         });
-        Gson gson = builder.create();
-        for (File file : directory.listFiles()) {
-            if (file.isDirectory()) {
-                continue;
-            }
-            CachedResponse requestToProxy = gson.fromJson(IOUtils.toString(new FileReader(file)), CachedResponse.class);
-            cache.put(file.getAbsolutePath(), requestToProxy);
-        }
+        return builder.create();
+    }
 
+    private void resetCacheAtStartup(String rootDirectory) {
+        if (System.getProperty(RESET_CACHE_AT_STARTUP) != null && !System.getProperty(RESET_CACHE_AT_STARTUP).isEmpty()) {
+            reset(rootDirectory);
+        }
     }
 
     /**
@@ -135,8 +159,10 @@ class FileBasedCache {
      * @param rootDirectory The directory storing the cached responses.
      */
     public static void reset(String rootDirectory) {
-        File directory = new File(rootDirectory);
-        directory.mkdir();
+        File directory = resolveCacheDirectory(rootDirectory);
+        if (directory.listFiles() == null) {
+            return;
+        }
         for (File file : directory.listFiles()) {
             if (file.isDirectory()) {
                continue;

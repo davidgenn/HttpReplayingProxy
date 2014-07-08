@@ -1,6 +1,6 @@
 # HttpReplayingProxy
 ## Introduction
-The HttpReplayingProxy is a library that allows you to mock HTTP requests with realistic responses. 
+The HttpReplayingProxy is a library that allows you to mock HTTP requests with pre-recorded responses and then keep these responses uptodate. 
 
 HttpReplayingProxy is a webapp that can proxy calls to the 'real' URL and cache the results in a directory. 
 
@@ -35,9 +35,12 @@ Your application should be configured to call `http://localhost:8585` instead of
 
 The responses will be cached in `/some/directory/to/cache/in`. This could be the test directory of your project and then the fixtures can be committed alongside your tests.
 
-To reset the cache:
+## How do you keep the cached responses up to date?
+You can reset the cache in two ways:
 
     FileBasedCache.reset("/some/directory/to/cache/in");
+
+Or by setting the `reset.httpreplayingproxy.cache` System property to true. This clears the cache when the server starts. 
      
 ## How does it work?
 HttpReplayingProxy creates a Jetty server at `localhost` on whatever port you specify. This webapp proxies calls through to the specified URL and caches the result. 
