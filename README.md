@@ -1,3 +1,4 @@
+[![Build Status](https://travis-ci.org/davidgenn/HttpReplayingProxy.svg?branch=master)](https://travis-ci.org/davidgenn/HttpReplayingProxy)
 # HttpReplayingProxy
 ## Introduction
 The HttpReplayingProxy is a library that allows you to mock HTTP requests with pre-recorded responses and then keep these responses uptodate. 
