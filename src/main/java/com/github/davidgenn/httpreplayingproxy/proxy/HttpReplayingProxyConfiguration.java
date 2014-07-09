@@ -8,7 +8,7 @@ public class HttpReplayingProxyConfiguration {
 	private String proxyUrl;
 	private int port = 8080;
     private String cacheRootDirectory;
-    private long timeToLiveSeconds = Long.MAX_VALUE / 2000;
+    private long timeToLiveSeconds = Long.MAX_VALUE / 2000; // will be multiplied by 1000 to turn into milliseconds.
 
     /**
      * @param urlToProxyTo The 'real' url to proxy calls to.

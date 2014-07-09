@@ -1,9 +1,7 @@
 package com.github.davidgenn.httpreplayingproxy.proxy;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -265,6 +263,62 @@ public class AcceptanceTest {
         assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
         assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
         assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
+    }
+
+    @Test
+    public void test_put_is_proxied_with_headers_and_cached() throws Exception {
+        // Given
+        stubFor(put(urlEqualTo("/verify/thisput"))
+                .withHeader("My-Header", equalTo("header-value"))
+                .withRequestBody(equalTo("{\"key\":\"value\"}"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("<response>Some content</response>")));
+
+        startHttpReplayingProxyServer();
+
+        // When
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpPut httpPut = new HttpPut("http://localhost:8585/verify/thisput");
+        httpPut.addHeader("My-Header", "header-value");
+        httpPut.setEntity(new StringEntity("{\"key\":\"value\"}"));
+        CloseableHttpResponse proxiedResponse = httpclient.execute(httpPut);
+
+        // Then
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
+        proxiedResponse = httpclient.execute(httpPut);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
+    }
+
+    @Test
+    public void test_delete_is_proxied_with_headers_and_cached() throws Exception {
+        // Given
+        stubFor(delete(urlEqualTo("/verify/this?query=value"))
+                .withHeader("My-Header", equalTo("header-value"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("<response>Some content</response>")));
+
+        startHttpReplayingProxyServer();
+
+        // When
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpDelete httpDelete = new HttpDelete("http://localhost:8585/verify/this?query=value");
+        httpDelete.addHeader("My-Header", "header-value");
+        CloseableHttpResponse proxiedResponse = httpclient.execute(httpDelete);
+
+        // Then
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
+        proxiedResponse = httpclient.execute(httpDelete);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
     }
 
     @After
