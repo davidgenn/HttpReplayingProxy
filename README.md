@@ -47,6 +47,21 @@ You can reset the cache in two ways:
     FileBasedCache.reset("/some/directory/to/cache/in");
 
 Or by setting the `reset.httpreplayingproxy.cache` System property to true. This clears the cache when the server starts. 
+
+## How are headers treated?
+You can decide how headers should be treated when looking for a previously cached result:
+
+     new HttpReplayingProxyConfiguration()
+       .treatHeaders(MatchHeaders.MATCH_NAME_AND_VALUE)
+       ...
+       
+`MatchHeader` can take the following values:
+
+`MATCH_NAME_AND_VALUE` The name and value of the headers must match.
+
+`MATCH_NAME_ONLY` Only the name of the headers must match, the values are ignored.
+
+`IGNORE_HEADERS` The headers are ignored completely.
      
 ## How does it work?
 HttpReplayingProxy creates a Jetty server at `localhost` on whatever port you specify. This webapp proxies calls through to the specified URL and caches the result. 

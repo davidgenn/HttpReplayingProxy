@@ -43,7 +43,7 @@ class ReplayingProxyHandler  extends AbstractHandler {
                        HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
 
-        RequestToProxy requestToProxy = RequestToProxy.from(baseRequest);
+        RequestToProxy requestToProxy = RequestToProxy.from(baseRequest, configuration.getMatchHeaders());
         LOG.info("Proxying="+requestToProxy.toString());
         CachedResponse cachedContent = fileBasedCache.get(requestToProxy);
         if (cachedContent == null) {

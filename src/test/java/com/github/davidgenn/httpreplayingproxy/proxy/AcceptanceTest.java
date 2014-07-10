@@ -40,7 +40,7 @@ public class AcceptanceTest {
     }
 
     @Test
-    public void test_get_is_proxied_with_headers_and_cached() throws Exception {
+    public void test_get_is_proxied_with_headers_exactly_matched_and_cached() throws Exception {
         // Given
         stubFor(get(urlEqualTo("/verify/this?query=value"))
                 .withHeader("My-Header", equalTo("header-value"))
@@ -64,6 +64,16 @@ public class AcceptanceTest {
         assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
         assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
         assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
+
+        httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Header", "header-other-value");
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(404); // Header value doesn't match
+
+        httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Other-Header", "header-other-value");
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(404); // Header doesn't match
     }
 
     @Test
@@ -147,10 +157,15 @@ public class AcceptanceTest {
     }
 
     private void startHttpReplayingProxyServer() throws Exception {
+        startHttpReplayingProxyServer(MatchHeaders.MATCH_NAME_AND_VALUE);
+    }
+
+    private void startHttpReplayingProxyServer(MatchHeaders matchHeaders) throws Exception {
         HttpReplayingProxyConfiguration configuration =
                 new HttpReplayingProxyConfiguration()
                         .urlToProxyTo("http://localhost:8080")
                         .portToHostOn(8585)
+                        .treatHeaders(matchHeaders)
                         .withRootDirectoryForCache(rootDirectory());
 
         server = new HttpReplayingProxy(configuration).start();
@@ -319,6 +334,91 @@ public class AcceptanceTest {
         assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
         assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
         assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
+    }
+
+    @Test
+    public void test_get_is_proxied_with_headers_ignored_and_cached() throws Exception {
+        // Given
+        stubFor(get(urlEqualTo("/verify/this?query=value"))
+                .withHeader("My-Header", equalTo("header-value"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("<response>Some content</response>")));
+
+        startHttpReplayingProxyServer(MatchHeaders.IGNORE_HEADERS);
+
+        // When
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Header", "header-value");
+        CloseableHttpResponse proxiedResponse = httpclient.execute(httpGet);
+
+        // Then
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
+
+        // With a different header value
+        httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Header", "other-header-value");
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true"); // Cached even with a different header
+
+        // With a different header
+        httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Other-Header", "other-header-value");
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true"); // Cached even with a different header
+    }
+
+    @Test
+    public void test_get_is_proxied_with_headers_values_ignored_and_cached() throws Exception {
+        // Given
+        stubFor(get(urlEqualTo("/verify/this?query=value"))
+                .withHeader("My-Header", equalTo("header-value"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody("<response>Some content</response>")));
+
+        startHttpReplayingProxyServer(MatchHeaders.MATCH_NAME_ONLY);
+
+        // When
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Header", "header-value");
+        CloseableHttpResponse proxiedResponse = httpclient.execute(httpGet);
+
+        // Then
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached")).isNull();
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true");
+
+        // With a different header value
+        httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Header", "other-header-value");
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(200);
+        assertThat(IOUtils.toString(proxiedResponse.getEntity().getContent())).isEqualTo("<response>Some content</response>");
+        assertThat(proxiedResponse.getFirstHeader("x-http-replaying-proxy-cached").getValue()).isEqualTo("true"); // Cached even with a different header value
+
+        // With a different header
+        httpGet = new HttpGet("http://localhost:8585/verify/this?query=value");
+        httpGet.addHeader("My-Other-Header", "other-header-value");
+        proxiedResponse = httpclient.execute(httpGet);
+        assertThat(proxiedResponse.getStatusLine().getStatusCode()).isEqualTo(404); // Different header
+
     }
 
     @After

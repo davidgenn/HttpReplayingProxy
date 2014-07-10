@@ -9,6 +9,7 @@ public class HttpReplayingProxyConfiguration {
 	private int port = 8080;
     private String cacheRootDirectory;
     private long timeToLiveSeconds = Long.MAX_VALUE / 2000; // will be multiplied by 1000 to turn into milliseconds.
+    private MatchHeaders matchHeaders = MatchHeaders.MATCH_NAME_ONLY;
 
     /**
      * @param urlToProxyTo The 'real' url to proxy calls to.
@@ -47,6 +48,15 @@ public class HttpReplayingProxyConfiguration {
     }
 
     /**
+     * @param matchHeaders How headers should be treated when looking for a previously cached response.
+     * @return The HttpReplayingProxyConfiguration.
+     */
+    public HttpReplayingProxyConfiguration treatHeaders(MatchHeaders matchHeaders) {
+        this.matchHeaders = matchHeaders;
+        return this;
+    }
+
+    /**
      * @return The url being proxied.
      */
 	public String getUrlToProxyTo() {
@@ -72,5 +82,12 @@ public class HttpReplayingProxyConfiguration {
      */
     public long getTimeToLiveSeconds() {
         return timeToLiveSeconds;
+    }
+
+    /**
+     * @return How headers should be treated when looking for a previously cached response.
+     */
+    public MatchHeaders getMatchHeaders() {
+        return matchHeaders;
     }
 }
