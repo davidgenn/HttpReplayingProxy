@@ -53,6 +53,9 @@ class RequestToProxy {
             if ("Content-Length".equals(headerName)) {
                 continue;
             }
+            if ("Host".equals(headerName)) {
+                continue;
+            }
 
             BasicHeader header = new BasicHeader(headerName, baseRequest.getHeader(headerName));
             headers.add(header);

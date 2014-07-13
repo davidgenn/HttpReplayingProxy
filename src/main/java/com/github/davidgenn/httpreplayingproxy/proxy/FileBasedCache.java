@@ -31,6 +31,9 @@ class FileBasedCache {
      * @throws IOException
      */
     public FileBasedCache(String rootDirectory, long timeToLiveInSeconds) throws IOException {
+        if (!rootDirectory.endsWith("/") && !rootDirectory.endsWith("\\")) {
+            rootDirectory = rootDirectory + "/";
+        }
         this.rootDirectory = rootDirectory;
         this.timeToLiveInSeconds = timeToLiveInSeconds;
         resetCacheAtStartup(rootDirectory);

@@ -8,13 +8,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
+import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.net.www.http.HttpClient;
 
 /**
  * The core Jetty handler that receives the requests that are to be proxied.
@@ -42,6 +49,8 @@ class ReplayingProxyHandler  extends AbstractHandler {
     public void handle(String target, Request baseRequest,
                        HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
+
+        if (request.getRequestURI().equals("/favicon.ico")) {return;}
 
         RequestToProxy requestToProxy = RequestToProxy.from(baseRequest, configuration.getMatchHeaders());
         LOG.info("Proxying="+requestToProxy.toString());
