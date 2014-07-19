@@ -11,18 +11,21 @@ class CachedResponse {
     private final int statusCode;
 	private final RequestToProxy requestToProxy;
     private final long timeCreatedUtcMillis;
+    private final String contentType;
 
     /**
      * Creates a CachedResponse.
      * @param statusCode The status code.
      * @param requestToProxy The request to proxy.
      * @param content The content of the response.
+     * @param contentType The content type of the responses. Used to set the Content_Type header.
      *
      */
-    public CachedResponse(int statusCode, RequestToProxy requestToProxy, String content) {
+    public CachedResponse(int statusCode, RequestToProxy requestToProxy, String content, String contentType) {
 		this.requestToProxy = requestToProxy;
 		this.statusCode = statusCode;
         this.content = content;
+        this.contentType = contentType;
         this.timeCreatedUtcMillis = new Date().getTime();
 	}
 
@@ -52,6 +55,13 @@ class CachedResponse {
      */
     public long getTimeCreatedUtcMillis() {
         return timeCreatedUtcMillis;
+    }
+
+    /**
+     * @return he content type of the responses. Used to set the Content_Type header.
+     */
+    public String getContentType() {
+        return contentType;
     }
 
     @Override
