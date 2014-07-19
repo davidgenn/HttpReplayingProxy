@@ -8,14 +8,20 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpResponse;
+import org.apache.http.ProtocolException;
+import org.apache.http.client.RedirectStrategy;
 import org.apache.http.client.methods.*;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpContext;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.net.www.http.HttpClient;
 
 /**
  * The core Jetty handler that receives the requests that are to be proxied.
@@ -44,6 +50,8 @@ class ReplayingProxyHandler  extends AbstractHandler {
                        HttpServletRequest request, HttpServletResponse response)
             throws IOException, ServletException {
 
+        if (request.getRequestURI().equals("/favicon.ico")) {return;}
+
         RequestToProxy requestToProxy = RequestToProxy.from(baseRequest, configuration.getMatchHeaders());
         LOG.info("Proxying="+requestToProxy.toString());
         CachedResponse cachedContent = fileBasedCache.get(requestToProxy);
@@ -55,18 +63,13 @@ class ReplayingProxyHandler  extends AbstractHandler {
             String content = IOUtils.toString(proxiedResponse.getEntity().getContent());
             response.setStatus(proxiedResponse.getStatusLine().getStatusCode());
             baseRequest.setHandled(true);
-            Header contentTypeHeader = proxiedResponse.getFirstHeader("Content-Type");
-            if (contentTypeHeader != null) {
-                response.addHeader("Content-Type", contentTypeHeader.getValue());
-            }
             response.getWriter().write(content);
-            fileBasedCache.put(requestToProxy.getRequestPath(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy, content, contentTypeHeader == null ? "" : contentTypeHeader.getValue()));
+            fileBasedCache.put(requestToProxy.getRequestPath(), new CachedResponse(proxiedResponse.getStatusLine().getStatusCode(), requestToProxy, content));
         } else {
             LOG.info("Cache-HIT="+requestToProxy.toString());
             response.addHeader("x-http-replaying-proxy-cached", "true");
             response.getWriter().write(cachedContent.getContent());
             response.setStatus(cachedContent.getStatusCode());
-            response.addHeader("Content-Type", cachedContent.getContentType());
             baseRequest.setHandled(true);
         }
     }
