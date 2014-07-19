@@ -68,7 +68,7 @@
                 <artifactId>jgitflow-maven-plugin</artifactId>
                 <version>1.0-m3</version>
                 <configuration>
-                    <!-- see goals wiki page for configuration options -->
+                    <allowUntracked>true</allowUntracked>
                 </configuration>
             </plugin>
             <plugin>
