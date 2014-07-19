@@ -2,7 +2,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.davidgenn</groupId>
     <artifactId>http-replaying-proxy</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     <name>HTTP Replaying Proxy</name>
     <description>The HTTP Replaying Proxy is a library that allows you to mock HTTP requests with realistic responses. </description>
     <url>https://github.com/davidgenn/HttpReplayingProxy</url>
