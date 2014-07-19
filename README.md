@@ -26,7 +26,7 @@ Add the dependency to your project:
     <dependency>
         <groupId>com.github.davidgenn</groupId>
     	<artifactId>http-replaying-proxy</artifactId>
-    	<version>0.1.0-SNAPSHOT</version>
+    	<version>0.1.0</version>
     	<scope>test</scope>
     </dependency>
     
@@ -38,7 +38,7 @@ Use the following in your test:
                         .portToHostOn(8585)
                         .withRootDirectoryForCache("/some/directory/to/cache/in");
 
-    server = new HttpReplayingProxy(configuration).start();
+    Server server = new HttpReplayingProxy(configuration).start();
 
 Your application should be configured to call `http://localhost:8585` instead of `https://service-I-call.com`.
 
